@@ -1,9 +1,12 @@
 Flask==3.0.0
 flask-cors==4.0.0
-gunicorn==21.2.0
-numpy==1.26.4
+gunicorn==20.1.0
+# 核心：在 Py3.10 下，numpy 1.23.5 非常稳定，且兼容 numba/librosa
+numpy==1.23.5
+scipy==1.10.1
+# 音频处理
 librosa==0.10.1
-praat-parselmouth==0.4.3
 soundfile==0.12.1
-
-scipy==1.11.4
+praat-parselmouth==0.4.3
+# 辅助计算
+numba==0.56.4
