@@ -123,7 +123,7 @@ def analyze():
             score += 1
         if gne < 0.85:  # 注意：新 GNE 范围可能不同，需校准！
             score += 1
-        if abs(delta11) < 0.2:
+        if abs(delta11) > 0.2:
             score += 1
         risk = "high" if score >= 2 else "low"
 
