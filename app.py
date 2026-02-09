@@ -81,25 +81,6 @@ logger = logging.getLogger("PDVoiceDiagnoser")
 AudioSegment.converter = "ffmpeg"
 AudioSegment.ffprobe = "ffprobe"
 
-# 新增：验证FFmpeg是否可用（Render环境）
-def check_ffmpeg_availability():
-    try:
-        import subprocess
-        result = subprocess.run(
-            ["ffmpeg", "-version"],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
-        if result.returncode == 0:
-            logger.info("FFmpeg已成功加载，版本信息：" + result.stdout[:100])
-        else:
-            logger.error("FFmpeg加载失败：" + result.stderr)
-    except Exception as e:
-        logger.error(f"检测FFmpeg失败：{str(e)}")
-
-# 启动时检查FFmpeg
-check_ffmpeg_availability()
 
 # ===================== 数据类（结构化输出） =====================
 @dataclass
