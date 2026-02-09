@@ -197,10 +197,10 @@ def extract_hnr_by_band(sound: parselmouth.Sound, band: str) -> float:
     # 分频段最小基频配置（声学领域通用参数）
     band_pitch_map = {
         "HNR05": 50.0,    # 低频段（50Hz）：对应声带基频下限
-        "HNR15": 150.0,   # 中低频段（150Hz）：男性语音核心频段
-        "HNR25": 250.0,   # 中频段（250Hz）：中性语音核心频段
-        "HNR35": 350.0,   # 中高频段（350Hz）：女性语音核心频段
-        "HNR38": 380.0    # 高频段（380Hz）：儿童/高音语音频段
+        "HNR15": 50.0,   # 中低频段（150Hz）：男性语音核心频段
+        "HNR25": 50.0,   # 中频段（250Hz）：中性语音核心频段
+        "HNR35": 50.0,   # 中高频段（350Hz）：女性语音核心频段
+        "HNR38": 80.0    # 高频段（380Hz）：儿童/高音语音频段
     }
     
     try:
@@ -578,3 +578,4 @@ if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     # 启动Flask服务（生产环境建议用Gunicorn）
     app.run(host='0.0.0.0', port=port, debug=False)
+
