@@ -568,6 +568,7 @@ if __name__ == '__main__':
         logger.error(f"服务启动失败：{e}")
         exit(1)
     # 修改：读取Render的PORT环境变量，默认5000
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 10000))
     # 启动Flask服务（生产环境建议用Gunicorn）
     app.run(host='0.0.0.0', port=port, debug=False)
+
