@@ -367,17 +367,26 @@ def calculate_subtype_probs(feature_result: FeatureResult, pd_prob: float) -> Di
 
 # ===================== 诊断核心逻辑 =====================
 def diagnose(feature_result: FeatureResult) -> DiagnosisResult:
-    """使用预训练模型诊断PD + 新增亚型概率计算"""
+    """使用预训练模型诊断PD + 适配sklearn 1.3.2版本"""
     model, scaler, feature_order, subtype_clf = ModelManager.load_all()
     
-    # 1. 标准化31维声学特征（仅transform，不重新fit）
+    # 1. 标准化31维声学特征
     acoustic_scaled = scaler.transform(feature_result.acoustic_31d.reshape(1, -1))
-    # 2. 拼接性别特征（31+1=32维，匹配模型输入）
+    # 2. 拼接性别特征（31+1=32维）
     input_32d = np.hstack([acoustic_scaled, np.array([[feature_result.gender]], dtype=np.float64)])
-    # 3. 模型预测PD总体概率
-    pd_prob = float(model.predict_proba(input_32d)[0, 1])  # 转换为Python float
     
-    # 4. 诊断结论 & 风险等级
+    # 核心修复：适配1.3.2的LogisticRegression（避开multi_class属性）
+    try:
+        # 优先尝试predict_proba（如果模型兼容）
+        pd_prob = float(model.predict_proba(input_32d)[0, 1])
+    except AttributeError:
+        # 报multi_class错误时，用decision_function+Sigmoid计算概率
+        logger.warning("sklearn版本兼容问题，改用decision_function计算PD概率")
+        # decision_function返回样本到超平面的距离，Sigmoid转换为0-1概率
+        decision_score = model.decision_function(input_32d)[0]
+        pd_prob = float(1 / (1 + np.exp(-decision_score)))  # 等价于predict_proba的结果
+    
+    # 后续逻辑完全不变
     diagnosis = "患有PD" if pd_prob >= CONFIG["PD_THRESHOLD"] else "健康"
     if pd_prob >= 0.8:
         risk = "高风险"
@@ -386,13 +395,11 @@ def diagnose(feature_result: FeatureResult) -> DiagnosisResult:
     else:
         risk = "低风险"
     
-    # 5. 构造可视化特征字典（强制转换为Python原生类型）
     feat_dict = {}
     for name, val in zip(feature_order, feature_result.acoustic_31d):
-        feat_dict[name] = round(float(val), 4)  # 转换为Python float并保留4位小数
-    feat_dict["gender"] = int(feature_result.gender)  # 确保是Python int
+        feat_dict[name] = round(float(val), 4)
+    feat_dict["gender"] = int(feature_result.gender)
 
-    # 新增：6. 计算PD各亚型概率
     subtype_probs = calculate_subtype_probs(feature_result, pd_prob)
 
     return DiagnosisResult(
@@ -400,7 +407,7 @@ def diagnose(feature_result: FeatureResult) -> DiagnosisResult:
         diagnosis=diagnosis,
         risk=risk,
         features=feat_dict,
-        subtype_probs=subtype_probs  # 新增亚型概率输出
+        subtype_probs=subtype_probs
     )
 
 # ===================== Flask API服务（修复接口路径） =====================
@@ -571,4 +578,3 @@ if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     # 启动Flask服务（生产环境建议用Gunicorn）
     app.run(host='0.0.0.0', port=port, debug=False)
-
