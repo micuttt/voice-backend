@@ -1,9 +1,18 @@
-Flask==3.0.3
-flask-cors==5.0.0
-gunicorn==22.0.0
-# 锁定安全版本：避免 yanked 或不兼容
+# requirements.txt
+# 基础Web框架
+flask==2.3.3
+flask-cors==4.0.0
+# 音频处理核心库
+librosa==0.10.1
+parselmouth==0.4.3
+soundfile==0.12.1
+pydub==0.25.1
+# 数值计算&机器学习
 numpy==1.26.4
-scipy==1.11.4
-librosa==0.10.2
-praat-parselmouth==0.4.3
-SoundFile==0.12.1
+scikit-learn==1.3.2
+# 其他依赖
+pickle-mixin==1.0.2
+wave==0.0.2
+# 补充：pydub依赖的ffmpeg在Render已预装，无需添加
+# 补充：gunicorn（Render默认用这个启动，需要显式添加）
+gunicorn==21.2.0
